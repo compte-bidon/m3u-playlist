@@ -110,7 +110,7 @@ sudo tee "$SERVICE_FILE" > /dev/null <<EOF
 [Unit]
 Description=M3U playlist web server
 After=network.target ${SETUP_SERVICE}.service
-Requires=${SETUP_SERVICE}.service
+Wants=${SETUP_SERVICE}.service
 
 [Service]
 User=$(whoami)
@@ -136,9 +136,6 @@ sudo systemctl daemon-reload
 # -----------------------------
 echo "🚀 Enabling service..."
 sudo systemctl enable "$SERVICE_NAME"
-
-echo "🔁 Restarting service..."
-sudo systemctl restart "$SERVICE_NAME"
 
 echo ""
 echo "✅ Setup complete!"
