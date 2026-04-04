@@ -1,0 +1,4 @@
+requests
+streamlink
+yt-dlp
+yt-dlp-ejs
