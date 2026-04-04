@@ -56,7 +56,7 @@ if command -v deno &>/dev/null; then
     deno upgrade
     echo "✅ Deno upgraded: $(deno --version | head -1)"
 else
-    curl -fsSL https://deno.land/install.sh | sh
+    curl -fsSL https://deno.land/install.sh | sh -s -- -y
     sudo ln -sf "$HOME/.deno/bin/deno" /usr/local/bin/deno
     echo "✅ Deno installed: $(deno --version | head -1)"
 fi
