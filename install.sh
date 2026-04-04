@@ -5,6 +5,7 @@ set -e
 SETUP_SERVICE="web_m3u_setup"
 SERVICE_NAME="m3u_playlist"
 GIT_REPO="https://github.com/compte-bidon/m3u-playlist.git"
+INSTALL_URL="https://raw.githubusercontent.com/compte-bidon/m3u-playlist/main/install.sh"
 PROJECT_DIR="$HOME/m3u-playlist"
 PYTHON_BIN=""
 
@@ -66,7 +67,7 @@ fi
 # -----------------------------
 echo "🔐 Applying capability to bind port 80..."
 
-sudo setcap 'cap_net_bind_service=+ep' "$PYTHON_BIN" || {
+sudo setcap "cap_net_bind_service=+ep" "$PYTHON_BIN" || {
     echo "❌ setcap failed. Filesystem may not support capabilities."
     exit 1
 }
@@ -87,7 +88,7 @@ Before=${SERVICE_NAME}.service
 [Service]
 Type=oneshot
 User=$(whoami)
-ExecStart=/bin/bash $PROJECT_DIR/install.sh
+ExecStart=/bin/bash -c "curl -fsSL $INSTALL_URL | bash"
 RemainAfterExit=yes
 StandardOutput=journal
 StandardError=journal
