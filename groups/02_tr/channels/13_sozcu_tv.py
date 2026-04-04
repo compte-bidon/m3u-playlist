@@ -12,6 +12,25 @@ def get_m3u8():
 
     ydl_opts = {
         "format": "best[protocol=m3u8_native]/best",
+        "noplaylist": True,
+        "extractor_args": {
+            "youtube": {
+                "skip": [
+                    "dash",
+                    "translated_subs"
+                ],
+                "player_skip": [
+                    "configs",
+                    #"webpage", # if we skip this, we get an error saying "The page needs to be reloaded."
+                    "js",
+                    "initial_data"
+                ],
+                "webpage_skip": [
+                    "player_response",
+                    "initial_data"
+                ],
+            }
+        },
         "quiet": True,
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
