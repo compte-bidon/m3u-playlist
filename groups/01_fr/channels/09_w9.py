@@ -4,4 +4,11 @@ channel_name = "W9"
 channel_logo = "https://i.ibb.co/LNRd253/w9.png"
 
 def get_m3u8():
-    return requests.get("https://tvradiozap.eu/tools/np-m3u8.php/w9", allow_redirects=False).headers["Location"]
+    full_m3u = requests.get("https://tvradiozap.eu//live/x/vlc/d/tvzeu.m3u").text
+    channel_start = full_m3u.find('tvg-name="W9"')
+    channel_url_start = full_m3u.find("\n", channel_start) + 1
+    channel_url_end = full_m3u.find("\n", channel_url_start)
+    stream = full_m3u[channel_url_start:channel_url_end]
+    m3u8 = requests.get(stream, allow_redirects=False).headers["Location"]
+
+    return m3u8
