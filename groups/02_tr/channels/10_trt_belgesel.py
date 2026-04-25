@@ -7,6 +7,8 @@ channel_logo = "https://i.ibb.co/N1h8m96/trtbelgesel.png"
 def get_m3u8():
     #return "https://tv-trtbelgesel-dai.medya.trt.com.tr/master.m3u8" # doesn't work in this moment
 
+    requests.packages.urllib3.util.connection.HAS_IPV6 = False # Force IPV4 because IPV6 doesn't seem to work (either get 404 or 403 on final URL)
+
     channel_html = requests.get("https://www.canlitv.me/live/trtbelgesel-canli-izle").text
     referrer_start = channel_html.find("https://www.canlitv.me/geolive.php?kanal=trtbelgesel-canli-izle")
     referrer_end = channel_html.find('"', referrer_start)
