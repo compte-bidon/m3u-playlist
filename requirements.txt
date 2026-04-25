@@ -1,3 +1,4 @@
+mini-racer
 requests
 streamlink
 yt-dlp
