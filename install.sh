@@ -6,6 +6,7 @@ SETUP_SERVICE="web_m3u_setup"
 SERVICE_NAME="m3u_playlist"
 GIT_REPO="https://github.com/compte-bidon/m3u-playlist.git"
 INSTALL_URL="https://raw.githubusercontent.com/compte-bidon/m3u-playlist/main/install.sh"
+ENV_FILE=/etc/m3u-playlist.env
 PROJECT_DIR="$HOME/m3u-playlist"
 PYTHON_BIN=""
 
@@ -129,6 +130,7 @@ Wants=${SETUP_SERVICE}.service
 
 [Service]
 User=$(whoami)
+EnvironmentFile=$ENV_FILE
 WorkingDirectory=$PROJECT_DIR
 ExecStart=$PROJECT_DIR/start_server.sh
 Restart=always

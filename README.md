@@ -2,9 +2,10 @@
 
 ## Setup credentials
 
-echo 'export TF1EMAIL="my_email_address"' >> ~/.bashrc
-echo 'export TF1PASSWORD="my_password"' >> ~/.bashrc
-source ~/.bashrc
+sudo tee /etc/m3u-playlist.env > /dev/null <<EOF
+TF1EMAIL=my_email_address
+TF1PASSWORD=my_password
+EOF
 
 ## Install the web server
 

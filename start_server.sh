@@ -21,6 +21,6 @@ echo "📦 Updating dependencies..."
 pip install --upgrade pip
 pip install --upgrade -r "$PROJECT_DIR/requirements.txt"
 
-# 4. Start server (unabuffered so that print are showing when running sudo journalctl -u m3u_playlist -f)
+# 4. Start server (unbuffered so that prints are showing when running sudo journalctl -u m3u_playlist -f)
 echo "🌐 Launching server..."
 exec python -u "$PROJECT_DIR/server.py"
