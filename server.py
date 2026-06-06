@@ -74,7 +74,11 @@ for group_folder in sorted(groups_dir.iterdir()):
         
         channel_modules[group_folder.stem][module_name] = channel_module
 
-server = ThreadingHTTPServer(("0.0.0.0", PORT), MyHandler)
+try:
+    server = ThreadingHTTPServer(("0.0.0.0", PORT), MyHandler)
+except PermissionError:
+    print(f'Unable to start the server on port ${PORT}. On Windows, issue the command "NET stop HTTP" as administrator and try again.')
+    quit()
 
 print(f"Local:   http://localhost")
 print(f"Network: http://{local_ip}")

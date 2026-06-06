@@ -65,16 +65,16 @@ fi
 # -----------------------------
 # 5. Install/upgrade FFmpeg (unused for now)
 # -----------------------------
-# echo "🎬 Installing/upgrading FFmpeg..."
+echo "🎬 Installing/upgrading FFmpeg..."
 
-# sudo apt install -y ffmpeg
+sudo apt install -y ffmpeg
 
-# if command -v ffmpeg &>/dev/null; then
-#     echo "✅ FFmpeg installed: $(ffmpeg -version | head -1)"
-# else
-#     echo "❌ FFmpeg installation failed"
-#     exit 1
-# fi
+if command -v ffmpeg &>/dev/null; then
+    echo "✅ FFmpeg installed: $(ffmpeg -version | head -1)"
+else
+    echo "❌ FFmpeg installation failed"
+    exit 1
+fi
 
 # -----------------------------
 # 6. Apply setcap for port 80
