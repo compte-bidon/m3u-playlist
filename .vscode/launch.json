@@ -11,7 +11,9 @@
             "program": "server.py",
             "console": "integratedTerminal",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}\\.venv\\Scripts"
+                "PYTHONPATH": "${workspaceFolder}\\.venv\\Scripts",
+                "TF1EMAIL": "my_email_address",
+                "TF1PASSWORD": "my_password",
             }
         }
     ]

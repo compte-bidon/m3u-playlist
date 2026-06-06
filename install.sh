@@ -63,7 +63,21 @@ else
 fi
 
 # -----------------------------
-# 5. Apply setcap for port 80
+# 5. Install/upgrade FFmpeg (unused for now)
+# -----------------------------
+# echo "🎬 Installing/upgrading FFmpeg..."
+
+# sudo apt install -y ffmpeg
+
+# if command -v ffmpeg &>/dev/null; then
+#     echo "✅ FFmpeg installed: $(ffmpeg -version | head -1)"
+# else
+#     echo "❌ FFmpeg installation failed"
+#     exit 1
+# fi
+
+# -----------------------------
+# 6. Apply setcap for port 80
 # -----------------------------
 echo "🔐 Applying capability to bind port 80..."
 
@@ -73,7 +87,7 @@ sudo setcap "cap_net_bind_service=+ep" "$PYTHON_BIN" || {
 }
 
 # -----------------------------
-# 6. Create bootup setup service
+# 7. Create bootup setup service
 # -----------------------------
 SETUP_FILE="/etc/systemd/system/${SETUP_SERVICE}.service"
 
@@ -101,7 +115,7 @@ sudo systemctl enable "$SETUP_SERVICE"
 echo "✅ Setup service enabled"
 
 # -----------------------------
-# 7. Create systemd service for the playlist
+# 8. Create systemd service for the playlist
 # -----------------------------
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 
@@ -127,13 +141,13 @@ WantedBy=multi-user.target
 EOF
 
 # -----------------------------
-# 8. Reload systemd
+# 9. Reload systemd
 # -----------------------------
 echo "🔄 Reloading systemd..."
 sudo systemctl daemon-reload
 
 # -----------------------------
-# 9. Enable & restart
+# 10. Enable & restart
 # -----------------------------
 echo "🚀 Enabling service..."
 sudo systemctl enable "$SERVICE_NAME"

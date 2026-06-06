@@ -1,11 +1,6 @@
 from pathlib import Path
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 import socket
-import subprocess
-import sys
-import os
-import threading
-import time
 import importlib.util
 
 PORT = 80
@@ -16,7 +11,6 @@ channel_modules = {}
 class MyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         
-        print(self.path)
         paths = self.path.split("/")
         if paths[1] == "": # / -> Get m3u complete playlist
             content = m3u_content.encode("utf-8")
