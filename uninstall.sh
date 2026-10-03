@@ -1,4 +1,3 @@
-```bash
 #!/usr/bin/env bash
 
 set -e
@@ -11,10 +10,8 @@ PROJECT_DIR="$HOME/m3u-tv"
 
 SSH_DIR="$HOME/.ssh"
 SSH_KEY="$SSH_DIR/m3u_tv_deploy_key"
-SSH_CONFIG="$SSH_DIR/config"
-KNOWN_HOSTS="$SSH_DIR/known_hosts"
-
-SSH_HOST="github.com-m3u-tv"
+SSH_CONFIG="$SSH_DIR/m3u_tv_config"
+KNOWN_HOSTS="$SSH_DIR/m3u_tv_known_hosts"
 
 
 # ============================================================
@@ -69,46 +66,7 @@ fi
 
 
 # ============================================================
-# 3. Remove dedicated SSH configuration
-# ============================================================
-
-if [ -f "$SSH_CONFIG" ]; then
-
-    echo "⚙️ Removing dedicated SSH configuration..."
-
-    TEMP_CONFIG="$(mktemp)"
-
-    awk -v host="$SSH_HOST" '
-        BEGIN { skip=0 }
-
-        $0 == "Host " host {
-            skip=1
-            next
-        }
-
-        /^Host / {
-            skip=0
-        }
-
-        !skip {
-            print
-        }
-    ' "$SSH_CONFIG" > "$TEMP_CONFIG"
-
-    cat "$TEMP_CONFIG" > "$SSH_CONFIG"
-    rm -f "$TEMP_CONFIG"
-
-    echo "✅ SSH configuration cleaned"
-
-else
-
-    echo "ℹ️ SSH config not found"
-
-fi
-
-
-# ============================================================
-# 4. Save and remove dedicated SSH deploy key
+# 3. Save public key before removing SSH files
 # ============================================================
 
 PUBLIC_KEY=""
@@ -116,6 +74,49 @@ PUBLIC_KEY=""
 if [ -f "${SSH_KEY}.pub" ]; then
     PUBLIC_KEY="$(cat "${SSH_KEY}.pub")"
 fi
+
+
+# ============================================================
+# 4. Remove dedicated SSH configuration
+# ============================================================
+
+if [ -f "$SSH_CONFIG" ]; then
+
+    echo "⚙️ Removing dedicated SSH configuration..."
+
+    rm -f "$SSH_CONFIG"
+
+    echo "✅ Dedicated SSH configuration removed"
+
+else
+
+    echo "ℹ️ Dedicated SSH configuration already removed"
+
+fi
+
+
+# ============================================================
+# 5. Remove dedicated known_hosts
+# ============================================================
+
+if [ -f "$KNOWN_HOSTS" ]; then
+
+    echo "🔐 Removing dedicated GitHub known_hosts..."
+
+    rm -f "$KNOWN_HOSTS"
+
+    echo "✅ Dedicated GitHub known_hosts removed"
+
+else
+
+    echo "ℹ️ Dedicated GitHub known_hosts already removed"
+
+fi
+
+
+# ============================================================
+# 6. Remove dedicated SSH deploy key
+# ============================================================
 
 if [ -f "$SSH_KEY" ] || [ -f "${SSH_KEY}.pub" ]; then
 
@@ -134,7 +135,7 @@ fi
 
 
 # ============================================================
-# 5. Warn user about GitHub deploy key
+# 7. Warn user about GitHub deploy key
 # ============================================================
 
 if [ -n "$PUBLIC_KEY" ]; then
@@ -148,8 +149,8 @@ if [ -n "$PUBLIC_KEY" ]; then
     echo ""
     echo "However, the public key is still registered on GitHub."
     echo ""
-    echo "Please make sure you remove this key from the"
-    echo "Deploy Keys section of the private m3u-tv repository:"
+    echo "Please remove this key from the Deploy Keys section"
+    echo "of the private m3u-tv repository:"
     echo ""
     echo "  https://github.com/compte-bidon/m3u-tv/settings/keys"
     echo ""
@@ -157,48 +158,13 @@ if [ -n "$PUBLIC_KEY" ]; then
     echo ""
     echo "  $PUBLIC_KEY"
     echo ""
-    echo "⚠️  Make sure this key is deleted from GitHub before"
-    echo "    considering the uninstall completely finished."
+    echo "⚠️  The local uninstall is complete, but this key"
+    echo "    must also be removed from GitHub."
     echo ""
     echo "========================================"
     echo ""
     echo "Press ENTER to continue..."
     read -r
-
-fi
-
-
-# ============================================================
-# 6. Remove GitHub known_hosts entry
-# ============================================================
-
-if [ -f "$KNOWN_HOSTS" ]; then
-
-    echo "🔐 Removing dedicated GitHub known_hosts entry..."
-
-    ssh-keygen -R github.com -f "$KNOWN_HOSTS" >/dev/null 2>&1 || true
-
-    if [ -s "$KNOWN_HOSTS" ]; then
-        echo "✅ GitHub known_hosts entry cleaned"
-    else
-        rm -f "$KNOWN_HOSTS"
-        echo "✅ known_hosts removed"
-    fi
-
-else
-
-    echo "ℹ️ known_hosts file not found"
-
-fi
-
-
-# ============================================================
-# 7. Clean empty ~/.ssh directory
-# ============================================================
-
-if [ -d "$SSH_DIR" ]; then
-
-    rmdir "$SSH_DIR" 2>/dev/null || true
 
 fi
 
@@ -211,4 +177,3 @@ echo ""
 echo "========================================"
 echo " Uninstallation complete"
 echo "========================================"
-```

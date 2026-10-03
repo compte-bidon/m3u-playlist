@@ -1,4 +1,3 @@
-```bash
 #!/usr/bin/env bash
 
 set -e
@@ -12,8 +11,8 @@ PROJECT_DIR="$HOME/m3u-tv"
 
 SSH_DIR="$HOME/.ssh"
 SSH_KEY="$SSH_DIR/m3u_tv_deploy_key"
-SSH_CONFIG="$SSH_DIR/config"
-KNOWN_HOSTS="$SSH_DIR/known_hosts"
+SSH_CONFIG="$SSH_DIR/m3u_tv_config"
+KNOWN_HOSTS="$SSH_DIR/m3u_tv_known_hosts"
 
 SSH_HOST="github.com-m3u-tv"
 
@@ -88,7 +87,7 @@ chmod 644 "${SSH_KEY}.pub"
 
 
 # ============================================================
-# 4. Configure GitHub in known_hosts
+# 4. Configure dedicated GitHub known_hosts
 # ============================================================
 
 echo "🔐 Checking GitHub host key..."
@@ -97,80 +96,48 @@ touch "$KNOWN_HOSTS"
 chmod 600 "$KNOWN_HOSTS"
 
 if ssh-keygen -F github.com -f "$KNOWN_HOSTS" >/dev/null 2>&1; then
-    echo "✅ github.com is already in known_hosts"
+    echo "✅ github.com is already in dedicated known_hosts"
 else
-    echo "➕ Adding github.com to known_hosts..."
+    echo "➕ Adding github.com to dedicated known_hosts..."
 
     ssh-keyscan -H github.com >> "$KNOWN_HOSTS"
 
-    echo "✅ github.com added to known_hosts"
+    echo "✅ github.com added to dedicated known_hosts"
 fi
 
 
 # ============================================================
-# 5. Configure SSH
+# 5. Configure dedicated SSH config
 # ============================================================
 
-echo "⚙️ Configuring SSH..."
+echo "⚙️ Configuring dedicated SSH..."
 
-touch "$SSH_CONFIG"
-chmod 600 "$SSH_CONFIG"
-
-# Remove an existing block for our dedicated host.
-# This makes the configuration deterministic and idempotent.
-TEMP_CONFIG="$(mktemp)"
-
-awk -v host="$SSH_HOST" '
-    BEGIN { skip=0 }
-
-    $0 == "Host " host {
-        skip=1
-        next
-    }
-
-    /^Host / {
-        skip=0
-    }
-
-    !skip {
-        print
-    }
-' "$SSH_CONFIG" > "$TEMP_CONFIG"
-
-cat "$TEMP_CONFIG" > "$SSH_CONFIG"
-rm -f "$TEMP_CONFIG"
-
-cat >> "$SSH_CONFIG" <<EOF
-
+cat > "$SSH_CONFIG" <<EOF
 Host $SSH_HOST
     HostName github.com
     User git
     IdentityFile $SSH_KEY
     IdentitiesOnly yes
+    UserKnownHostsFile $KNOWN_HOSTS
+    StrictHostKeyChecking yes
 EOF
 
 chmod 600 "$SSH_CONFIG"
 
-echo "✅ SSH configuration ready"
+echo "✅ Dedicated SSH configuration ready"
 
 
 # ============================================================
-# 6. Test whether deploy key already has access
+# 6. Test deploy key access to the private repository
 # ============================================================
 
-echo "🔌 Testing GitHub authentication..."
+echo "🔌 Testing GitHub deploy key access..."
 
-SSH_TEST_OUTPUT="$(
-    ssh \
-        -o BatchMode=yes \
-        -o StrictHostKeyChecking=yes \
-        -F "$SSH_CONFIG" \
-        -T "git@$SSH_HOST" 2>&1 || true
-)"
+if git \
+    -c core.sshCommand="ssh -F $SSH_CONFIG" \
+    ls-remote "$PRIVATE_REPO" >/dev/null 2>&1; then
 
-if echo "$SSH_TEST_OUTPUT" | grep -q "successfully authenticated"; then
-
-    echo "✅ GitHub deploy key is already authorized"
+    echo "✅ GitHub deploy key has access to m3u-tv"
 
 else
 
@@ -211,21 +178,18 @@ else
     # Test again after the user added the key
     # --------------------------------------------------------
 
-    echo "🔌 Testing GitHub authentication again..."
+    echo "🔌 Testing GitHub deploy key access again..."
 
-    SSH_TEST_OUTPUT="$(
-        ssh \
-            -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes \
-            -F "$SSH_CONFIG" \
-            -T "git@$SSH_HOST" 2>&1 || true
-    )"
+    if git \
+        -c core.sshCommand="ssh -F $SSH_CONFIG" \
+        ls-remote "$PRIVATE_REPO" >/dev/null 2>&1; then
 
-    if echo "$SSH_TEST_OUTPUT" | grep -q "successfully authenticated"; then
-        echo "✅ GitHub deploy key authorized"
+        echo "✅ GitHub deploy key authorized for m3u-tv"
+
     else
+
         echo ""
-        echo "❌ GitHub SSH authentication failed."
+        echo "❌ GitHub deploy key access failed."
         echo ""
         echo "Make sure that:"
         echo "  1. The public key was added to the"
@@ -297,4 +261,3 @@ echo "🚀 Running private installer..."
 echo ""
 
 exec bash "$PROJECT_DIR/install.sh"
-```

@@ -1,2 +1,0 @@
-Run this command when uninstall is pushed to remote repo:
-git update-index --chmod=+x .\uninstall.sh

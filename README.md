@@ -100,9 +100,9 @@ chmod 755 /data/local/tmp/frida-server
 
 - The keys output path is relative to your current working directory..so whichever folder you were in when you ran keydive.
 
-- Copy the keys (client_id.bin, keybox.enc, privte_key.pem and the .wvd files) as needed somewhere on the device running the m3u playlist web server and note the path to the .wvd file.
-
 ## Setup credentials
+
+- Copy the CDM keys you previously extracted (client_id.bin, keybox.enc, privte_key.pem and the .wvd files) somewhere on the device running the m3u playlist web server and note the path to the .wvd file.
 
 ```sh
 sudo tee /etc/m3u-tv.env > /dev/null <<EOF
@@ -116,11 +116,15 @@ EOF
 
 ## Install the web server
 
-`curl -fsSL https://raw.githubusercontent.com/compte-bidon/m3u-tv/main/install.sh | bash`
+`curl -fsSL https://raw.githubusercontent.com/compte-bidon/m3u-playlist/main/install.sh | bash`
+
+- When prompted, register the SSH public key in deploy keys: https://github.com/compte-bidon/m3u-tv/settings/keys
 
 ## Uninstall the web server
 
-`curl -fsSL https://raw.githubusercontent.com/compte-bidon/m3u-tv/main/uninstall.sh | bash`
+`curl -fsSL https://raw.githubusercontent.com/compte-bidon/m3u-playlist/main/uninstall.sh | bash`
+
+- When prompted, remove the SSH public key in deploy keys: https://github.com/compte-bidon/m3u-tv/settings/keys
 
 # Cheatsheet
 
