@@ -1,170 +1,300 @@
+```bash
 #!/usr/bin/env bash
 
 set -e
 
-SETUP_SERVICE="web_m3u_setup"
-SERVICE_NAME="m3u_playlist"
-GIT_REPO="https://github.com/compte-bidon/m3u-playlist.git"
-INSTALL_URL="https://raw.githubusercontent.com/compte-bidon/m3u-playlist/main/install.sh"
-ENV_FILE=/etc/m3u-playlist.env
-PROJECT_DIR="$HOME/m3u-playlist"
-PYTHON_BIN=""
+# ============================================================
+# Configuration
+# ============================================================
 
-echo "📁 Project dir: $PROJECT_DIR"
+PRIVATE_REPO="git@github.com:compte-bidon/m3u-tv.git"
+PROJECT_DIR="$HOME/m3u-tv"
 
-# -----------------------------
-# 1. Install Python 3.13 (APT)
-# -----------------------------
-echo "🐍 Installing/upgrading Python 3.13..."
+SSH_DIR="$HOME/.ssh"
+SSH_KEY="$SSH_DIR/m3u_tv_deploy_key"
+SSH_CONFIG="$SSH_DIR/config"
+KNOWN_HOSTS="$SSH_DIR/known_hosts"
 
-sudo apt update
+SSH_HOST="github.com-m3u-tv"
 
-sudo apt install -y python3.13 python3.13-venv
-echo "✅ Python 3.13 installed and updated"
-PYTHON_BIN="$(which python3.13)"
-echo "👉 Using Python: $PYTHON_BIN"
 
-# -----------------------------
-# 2. Install/upgrade git + clone/pull repo
-# -----------------------------
-echo "🔧 Installing/upgrading git..."
-sudo apt install -y git
+# ============================================================
+# Helpers
+# ============================================================
 
-echo "📂 Cloning/updating repository..."
+echo "========================================"
+echo " M3U Playlist Installer"
+echo "========================================"
+echo ""
+
+
+# ============================================================
+# 1. Install Git and OpenSSH
+# ============================================================
+
+echo "📦 Checking dependencies..."
+
+if command -v git >/dev/null 2>&1; then
+    echo "✅ Git is already installed"
+else
+    echo "📦 Installing Git..."
+
+    sudo apt update
+    sudo apt install -y git
+
+    echo "✅ Git installed"
+fi
+
+if command -v ssh >/dev/null 2>&1; then
+    echo "✅ OpenSSH is already installed"
+else
+    echo "📦 Installing OpenSSH client..."
+
+    sudo apt update
+    sudo apt install -y openssh-client
+
+    echo "✅ OpenSSH installed"
+fi
+
+
+# ============================================================
+# 2. Create ~/.ssh
+# ============================================================
+
+mkdir -p "$SSH_DIR"
+chmod 700 "$SSH_DIR"
+
+
+# ============================================================
+# 3. Generate dedicated SSH deploy key
+# ============================================================
+
+if [ -f "$SSH_KEY" ]; then
+    echo "✅ SSH deploy key already exists"
+else
+    echo "🔐 Generating SSH deploy key..."
+
+    ssh-keygen \
+        -t ed25519 \
+        -f "$SSH_KEY" \
+        -N "" \
+        -C "m3u-tv-deploy-key"
+
+    echo "✅ SSH deploy key generated"
+fi
+
+chmod 600 "$SSH_KEY"
+chmod 644 "${SSH_KEY}.pub"
+
+
+# ============================================================
+# 4. Configure GitHub in known_hosts
+# ============================================================
+
+echo "🔐 Checking GitHub host key..."
+
+touch "$KNOWN_HOSTS"
+chmod 600 "$KNOWN_HOSTS"
+
+if ssh-keygen -F github.com -f "$KNOWN_HOSTS" >/dev/null 2>&1; then
+    echo "✅ github.com is already in known_hosts"
+else
+    echo "➕ Adding github.com to known_hosts..."
+
+    ssh-keyscan -H github.com >> "$KNOWN_HOSTS"
+
+    echo "✅ github.com added to known_hosts"
+fi
+
+
+# ============================================================
+# 5. Configure SSH
+# ============================================================
+
+echo "⚙️ Configuring SSH..."
+
+touch "$SSH_CONFIG"
+chmod 600 "$SSH_CONFIG"
+
+# Remove an existing block for our dedicated host.
+# This makes the configuration deterministic and idempotent.
+TEMP_CONFIG="$(mktemp)"
+
+awk -v host="$SSH_HOST" '
+    BEGIN { skip=0 }
+
+    $0 == "Host " host {
+        skip=1
+        next
+    }
+
+    /^Host / {
+        skip=0
+    }
+
+    !skip {
+        print
+    }
+' "$SSH_CONFIG" > "$TEMP_CONFIG"
+
+cat "$TEMP_CONFIG" > "$SSH_CONFIG"
+rm -f "$TEMP_CONFIG"
+
+cat >> "$SSH_CONFIG" <<EOF
+
+Host $SSH_HOST
+    HostName github.com
+    User git
+    IdentityFile $SSH_KEY
+    IdentitiesOnly yes
+EOF
+
+chmod 600 "$SSH_CONFIG"
+
+echo "✅ SSH configuration ready"
+
+
+# ============================================================
+# 6. Test whether deploy key already has access
+# ============================================================
+
+echo "🔌 Testing GitHub authentication..."
+
+SSH_TEST_OUTPUT="$(
+    ssh \
+        -o BatchMode=yes \
+        -o StrictHostKeyChecking=yes \
+        -F "$SSH_CONFIG" \
+        -T "git@$SSH_HOST" 2>&1 || true
+)"
+
+if echo "$SSH_TEST_OUTPUT" | grep -q "successfully authenticated"; then
+
+    echo "✅ GitHub deploy key is already authorized"
+
+else
+
+    # ========================================================
+    # 7. First-time setup: ask user to add deploy key
+    # ========================================================
+
+    echo ""
+    echo "========================================"
+    echo " ACTION REQUIRED"
+    echo "========================================"
+    echo ""
+    echo "This device is not yet authorized to access"
+    echo "the private m3u-tv repository."
+    echo ""
+    echo "Add the following SSH key as a DEPLOY KEY"
+    echo "to the private GitHub repository:"
+    echo ""
+    echo "  https://github.com/compte-bidon/m3u-tv/settings/keys"
+    echo ""
+    echo "Public key:"
+    echo ""
+    cat "${SSH_KEY}.pub"
+    echo ""
+    echo "========================================"
+    echo ""
+    echo "IMPORTANT:"
+    echo "  - Give the key READ-ONLY access."
+    echo "  - Do NOT enable 'Allow write access'."
+    echo ""
+    echo "After adding the key to GitHub, press ENTER"
+    echo "to continue."
+    echo ""
+
+    read -r
+
+    # --------------------------------------------------------
+    # Test again after the user added the key
+    # --------------------------------------------------------
+
+    echo "🔌 Testing GitHub authentication again..."
+
+    SSH_TEST_OUTPUT="$(
+        ssh \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -F "$SSH_CONFIG" \
+            -T "git@$SSH_HOST" 2>&1 || true
+    )"
+
+    if echo "$SSH_TEST_OUTPUT" | grep -q "successfully authenticated"; then
+        echo "✅ GitHub deploy key authorized"
+    else
+        echo ""
+        echo "❌ GitHub SSH authentication failed."
+        echo ""
+        echo "Make sure that:"
+        echo "  1. The public key was added to the"
+        echo "     Deploy Keys section of m3u-tv."
+        echo "  2. The key was added to the correct repository."
+        echo "  3. The key was added as READ-ONLY."
+        echo ""
+        echo "Once done, run this installation script again."
+        echo ""
+
+        exit 1
+    fi
+fi
+
+
+# ============================================================
+# 8. Clone or update private repository
+# ============================================================
+
+echo ""
+echo "📂 Checking private repository..."
+
 if [ -d "$PROJECT_DIR/.git" ]; then
-    echo "🔄 Repo already exists, pulling latest..."
-    git -C "$PROJECT_DIR" pull
-    echo "✅ Repository updated"
+
+    echo "✅ Private repository already exists"
+    echo "🔄 Updating repository..."
+
+    git -C "$PROJECT_DIR" \
+        -c core.sshCommand="ssh -F $SSH_CONFIG" \
+        pull
+
 else
-    git clone "$GIT_REPO" "$PROJECT_DIR"
-    echo "✅ Repository cloned"
+
+    # If the directory exists but isn't a Git repository,
+    # don't overwrite it.
+    if [ -e "$PROJECT_DIR" ]; then
+        echo ""
+        echo "❌ $PROJECT_DIR already exists but is not a Git repository."
+        echo "Please remove or rename it before running the installer."
+        exit 1
+    fi
+
+    echo "📥 Cloning private repository..."
+
+    git \
+        -c core.sshCommand="ssh -F $SSH_CONFIG" \
+        clone "$PRIVATE_REPO" "$PROJECT_DIR"
 fi
 
-# -----------------------------
-# 3. Install/upgrade unzip
-# -----------------------------
-echo "📦 Installing/upgrading unzip..."
 
-sudo apt install -y unzip
-echo "✅ unzip installed and updated"
+# ============================================================
+# 9. Configure repository to permanently use deploy key
+# ============================================================
 
-# -----------------------------
-# 4. Install/upgrade Deno
-# -----------------------------
-echo "🦕 Installing/upgrading Deno..."
+echo "⚙️ Configuring repository SSH authentication..."
 
-if command -v deno &>/dev/null; then
-    echo "🔄 Deno already installed, upgrading..."
-    deno upgrade
-    echo "✅ Deno upgraded: $(deno --version | head -1)"
-else
-    curl -fsSL https://deno.land/install.sh | sh -s -- -y
-    sudo ln -sf "$HOME/.deno/bin/deno" /usr/local/bin/deno
-    echo "✅ Deno installed: $(deno --version | head -1)"
-fi
+git -C "$PROJECT_DIR" config \
+    core.sshCommand "ssh -F $SSH_CONFIG"
 
-# -----------------------------
-# 5. Install/upgrade FFmpeg (unused for now)
-# -----------------------------
-echo "🎬 Installing/upgrading FFmpeg..."
+echo "✅ Repository SSH authentication configured"
 
-sudo apt install -y ffmpeg
 
-if command -v ffmpeg &>/dev/null; then
-    echo "✅ FFmpeg installed: $(ffmpeg -version | head -1)"
-else
-    echo "❌ FFmpeg installation failed"
-    exit 1
-fi
-
-# -----------------------------
-# 6. Apply setcap for port 80
-# -----------------------------
-echo "🔐 Applying capability to bind port 80..."
-
-sudo setcap "cap_net_bind_service=+ep" "$PYTHON_BIN" || {
-    echo "❌ setcap failed. Filesystem may not support capabilities."
-    exit 1
-}
-
-# -----------------------------
-# 7. Create bootup setup service
-# -----------------------------
-SETUP_FILE="/etc/systemd/system/${SETUP_SERVICE}.service"
-
-echo "⚙️ Creating/updating setup service..."
-
-sudo tee "$SETUP_FILE" > /dev/null <<EOF
-[Unit]
-Description=${SERVICE_NAME} setup (runs on every boot)
-After=network.target
-Before=${SERVICE_NAME}.service
-
-[Service]
-Type=oneshot
-User=$(whoami)
-ExecStart=/bin/bash -c "curl -fsSL $INSTALL_URL | bash"
-RemainAfterExit=yes
-StandardOutput=journal
-StandardError=journal
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-sudo systemctl enable "$SETUP_SERVICE"
-echo "✅ Setup service enabled"
-
-# -----------------------------
-# 8. Create systemd service for the playlist
-# -----------------------------
-SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
-
-echo "⚙️ Creating/updating systemd service..."
-
-sudo tee "$SERVICE_FILE" > /dev/null <<EOF
-[Unit]
-Description=M3U playlist web server
-After=network.target ${SETUP_SERVICE}.service
-Wants=${SETUP_SERVICE}.service
-
-[Service]
-User=$(whoami)
-EnvironmentFile=$ENV_FILE
-WorkingDirectory=$PROJECT_DIR
-ExecStart=$PROJECT_DIR/start_server.sh
-Restart=always
-RestartSec=5
-StandardOutput=journal
-StandardError=journal
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# -----------------------------
-# 9. Reload systemd
-# -----------------------------
-echo "🔄 Reloading systemd..."
-sudo systemctl daemon-reload
-
-# -----------------------------
-# 10. Enable & restart
-# -----------------------------
-echo "🚀 Enabling service..."
-sudo systemctl enable "$SERVICE_NAME"
+# ============================================================
+# 10. Run private installer
+# ============================================================
 
 echo ""
-echo "✅ Setup complete!"
+echo "🚀 Running private installer..."
 echo ""
-echo "📌 Useful commands:"
-echo "----------------------------------------"
-echo "List services:     sudo systemctl list-units --type=service"
-echo "Start service:     sudo systemctl start $SERVICE_NAME"
-echo "Stop service:      sudo systemctl stop $SERVICE_NAME"
-echo "Restart service:   sudo systemctl restart $SERVICE_NAME"
-echo "Status:            sudo systemctl status $SERVICE_NAME"
-echo "Logs (live):       sudo journalctl -u $SERVICE_NAME -f"
-echo "Logs (history):    sudo journalctl -u $SERVICE_NAME"
-echo "Disable autostart: sudo systemctl disable $SERVICE_NAME"
-echo "----------------------------------------"
+
+exec bash "$PROJECT_DIR/install.sh"
+```

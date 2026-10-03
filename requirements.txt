@@ -1,5 +1,0 @@
-mini-racer
-requests
-streamlink
-yt-dlp
-yt-dlp-ejs
