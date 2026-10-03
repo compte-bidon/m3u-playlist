@@ -1,9 +1,9 @@
 # m3u-playlist
 A web server that generates a m3u playlist with main channels from France and Türkiye.
 
-# Setup instructions
+# 1. Setup instructions
 
-## Extract Content Decryption Module (CDM)
+## 1.1 Extract Content Decryption Module (CDM)
 In order to watch DRM-protected content, you will need a Content Decryption Module (CDM).
 The channels below are DRM-protected:
 - M6
@@ -100,7 +100,7 @@ chmod 755 /data/local/tmp/frida-server
 
 - The keys output path is relative to your current working directory..so whichever folder you were in when you ran keydive.
 
-## Setup credentials
+## 1.2 Setup credentials
 
 - Copy the CDM keys you previously extracted (client_id.bin, keybox.enc, privte_key.pem and the .wvd files) somewhere on the device running the m3u playlist web server and note the path to the .wvd file.
 
@@ -114,23 +114,23 @@ M6PASSWORD=my_m6_email_password
 EOF
 ```
 
-## Install the web server
+## 1.3 Install the web server
 
 `curl -fsSL https://raw.githubusercontent.com/compte-bidon/m3u-playlist/main/install.sh | bash`
 
 - When prompted, register the SSH public key in deploy keys: https://github.com/compte-bidon/m3u-tv/settings/keys
 
-## Uninstall the web server
+## 1.4 Uninstall the web server
 
 `curl -fsSL https://raw.githubusercontent.com/compte-bidon/m3u-playlist/main/uninstall.sh | bash`
 
 - When prompted, remove the SSH public key in deploy keys: https://github.com/compte-bidon/m3u-tv/settings/keys
 
-# Cheatsheet
+# 2. Cheatsheet
 
 List services: `sudo systemctl list-units --type=service`
 
-## Setup script
+## 2.1 Setup script
 
 Status:            `sudo systemctl status web_m3u_setup`
 
@@ -140,7 +140,7 @@ Logs (history):    `sudo journalctl -u web_m3u_setup`
 
 Disable autostart: `sudo systemctl disable web_m3u_setup`
 
-## Web server
+## 2.2 Web server
 
 Start service:     `sudo systemctl start m3u_tv`
 
@@ -156,7 +156,7 @@ Logs (history):    `sudo journalctl -u m3u_tv`
 
 Disable autostart: `sudo systemctl disable m3u_tv`
 
-## MediaFlow Proxy Light
+## 2.3 MediaFlow Proxy Light
 
 Start service:     `sudo systemctl start mediaflow_light`
 
