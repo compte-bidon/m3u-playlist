@@ -163,7 +163,8 @@ if [ -n "$PUBLIC_KEY" ]; then
     echo ""
     echo "========================================"
     echo ""
-    read -n 1 -s -r -p "Press any key to continue..."
+    echo "Press ENTER to continue..."
+    read -r </dev/tty
 
 fi
 
