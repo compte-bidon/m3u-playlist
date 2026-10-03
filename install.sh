@@ -6,7 +6,7 @@ set -e
 # Configuration
 # ============================================================
 
-PRIVATE_REPO="git@github.com:compte-bidon/m3u-tv.git"
+PRIVATE_REPO="git@github.com-m3u-tv:compte-bidon/m3u-tv.git"
 PROJECT_DIR="$HOME/m3u-tv"
 
 SSH_DIR="$HOME/.ssh"
@@ -14,7 +14,7 @@ SSH_KEY="$SSH_DIR/m3u_tv_deploy_key"
 SSH_CONFIG="$SSH_DIR/m3u_tv_config"
 KNOWN_HOSTS="$SSH_DIR/m3u_tv_known_hosts"
 
-SSH_HOST="github.com-m3u-tv"
+SSH_HOST="github.com-m3u-tv" # This is an alias for github.com. We are using this alias so that we can use a dedicated known hosts configuration
 
 
 # ============================================================
