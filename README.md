@@ -18,16 +18,16 @@ Source: https://forum.videohelp.com/threads/408031-Dumping-Your-own-L3-CDM-with-
 - Select Android 14 API Level 34
 - This should install to your %localappdata%\Android\Sdk\ folder
 
-![Step 1](https://github.com/compte-bidon/m3u-tv/blob/main/doc_assets/cdm_extract/Step1.png?raw=true)
+![Step 1](https://github.com/compte-bidon/m3u-playlist/blob/main/doc_assets/cdm_extract/Step1.png?raw=true)
 
 - Create a new Pixel 4 XL device
 
-![Step 2](https://github.com/compte-bidon/m3u-tv/blob/main/doc_assets/cdm_extract/Step2.png?raw=true)
+![Step 2](https://github.com/compte-bidon/m3u-playlist/blob/main/doc_assets/cdm_extract/Step2.png?raw=true)
 
 - Use API 34 and select Google APIs Intel x86_64 Atom System Image
 - Create the device
 
-![Step 3](https://github.com/compte-bidon/m3u-tv/blob/main/doc_assets/cdm_extract/Step3.png?raw=true)
+![Step 3](https://github.com/compte-bidon/m3u-playlist/blob/main/doc_assets/cdm_extract/Step3.png?raw=true)
 
 - On your system install Python3
     - Example: [Python 3.14](https://www.python.org/downloads/release/python-3147/)
@@ -44,11 +44,11 @@ Setup ADB so it is an Environmental Path:
 - In User or System variables; select Path and Edit..
 - Enter the path to your Android SDK's "platform-tools" folder
 
-![Step 4](https://github.com/compte-bidon/m3u-tv/blob/main/doc_assets/cdm_extract/Step4.png?raw=true)
+![Step 4](https://github.com/compte-bidon/m3u-playlist/blob/main/doc_assets/cdm_extract/Step4.png?raw=true)
 
 - Open a new CMD and test its working by typing 'adb --version'
 
-![Step 5](https://github.com/compte-bidon/m3u-tv/blob/main/doc_assets/cdm_extract/Step5.png?raw=true)
+![Step 5](https://github.com/compte-bidon/m3u-playlist/blob/main/doc_assets/cdm_extract/Step5.png?raw=true)
 
 Next we follow the same rooting and frida-server steps:
 - Make sure the device is powered on in Android Studio
@@ -76,7 +76,7 @@ chmod 755 /data/local/tmp/frida-server
 - Look at your device and you will see the app open on the phone and a pink icon in the bottom corner
 - Click the icon then "Provision Widevine"
 
-![Step 6](https://github.com/compte-bidon/m3u-tv/blob/main/doc_assets/cdm_extract/Step6.png?raw=true)
+![Step 6](https://github.com/compte-bidon/m3u-playlist/blob/main/doc_assets/cdm_extract/Step6.png?raw=true)
 
 - You should see it successfully connect
 
@@ -96,7 +96,7 @@ chmod 755 /data/local/tmp/frida-server
 
 - It should display your output keys
 
-![Step 7](https://github.com/compte-bidon/m3u-tv/blob/main/doc_assets/cdm_extract/Step7.png?raw=true)
+![Step 7](https://github.com/compte-bidon/m3u-playlist/blob/main/doc_assets/cdm_extract/Step7.png?raw=true)
 
 - The keys output path is relative to your current working directory..so whichever folder you were in when you ran keydive.
 
