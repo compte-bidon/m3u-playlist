@@ -118,6 +118,8 @@ EOF
 
 `curl -fsSL https://raw.githubusercontent.com/compte-bidon/m3u-playlist/main/install.sh | bash`
 
+- If you are prompted to choose whether to continue because of the authenticity of github.com could not be established, enter yes to continue.
+
 - When prompted, register the SSH public key in deploy keys: https://github.com/compte-bidon/m3u-tv/settings/keys
 
 ## 1.4 Uninstall the web server

@@ -168,11 +168,9 @@ else
     echo "  - Give the key READ-ONLY access."
     echo "  - Do NOT enable 'Allow write access'."
     echo ""
-    echo "After adding the key to GitHub, press ENTER"
-    echo "to continue."
-    echo ""
+    echo "After adding the key to GitHub,"
 
-    read -r
+    read -n 1 -s -r -p "press any key to continue."
 
     # --------------------------------------------------------
     # Test again after the user added the key

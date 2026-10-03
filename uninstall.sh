@@ -163,8 +163,7 @@ if [ -n "$PUBLIC_KEY" ]; then
     echo ""
     echo "========================================"
     echo ""
-    echo "Press ENTER to continue..."
-    read -r
+    read -n 1 -s -r -p "Press any key to continue..."
 
 fi
 
