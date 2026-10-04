@@ -70,9 +70,11 @@ fi
 # ============================================================
 
 PUBLIC_KEY=""
+FINGERPRINT=""
 
 if [ -f "${SSH_KEY}.pub" ]; then
     PUBLIC_KEY="$(cat "${SSH_KEY}.pub")"
+    FINGERPRINT="$(ssh-keygen -lf "${SSH_KEY}.pub" -E sha256 | awk '{print $2}')"
 fi
 
 
@@ -157,6 +159,10 @@ if [ -n "$PUBLIC_KEY" ]; then
     echo "Public key:"
     echo ""
     echo "  $PUBLIC_KEY"
+    echo ""
+    echo "Public key fingerprint:"
+    echo ""
+    echo "SHA256:$FINGERPRINT"
     echo ""
     echo "⚠️  The local uninstall is complete, but this key"
     echo "    must also be removed from GitHub."
