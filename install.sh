@@ -301,5 +301,8 @@ JOURNAL_PID=$!
 wait "$START_PID"
 SERVICE_EXIT_CODE=$?
 
+# Give journalctl a moment to receive the final messages
+sleep 1
+
 kill "$JOURNAL_PID" 2>/dev/null || true
 wait "$JOURNAL_PID" 2>/dev/null || true
