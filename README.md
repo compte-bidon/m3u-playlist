@@ -7,6 +7,7 @@ A web server that generates a m3u playlist with main channels from France and TÃ
 In order to watch DRM-protected content, you will need a Content Decryption Module (CDM).
 The channels below are DRM-protected:
 - M6
+- W9
 
 The steps to extract the CDM are detailed below. You can ignore this part if you do not intend on watching DRM-protected content.
 
@@ -103,6 +104,8 @@ chmod 755 /data/local/tmp/frida-server
 ## 1.2 Setup credentials
 
 - Copy the CDM keys you previously extracted (client_id.bin, keybox.enc, privte_key.pem and the .wvd files) somewhere on the device running the m3u playlist web server and note the path to the .wvd file.
+
+- Create the environment variables file with your credentials using the command below (W9 is the same website as M6):
 
 ```sh
 sudo tee /etc/m3u-tv.env > /dev/null <<EOF
