@@ -162,7 +162,7 @@ if [ -n "$PUBLIC_KEY" ]; then
     echo ""
     echo "Public key fingerprint:"
     echo ""
-    echo "SHA256:$FINGERPRINT"
+    echo "$FINGERPRINT"
     echo ""
     echo "⚠️  The local uninstall is complete, but this key"
     echo "    must also be removed from GitHub."
