@@ -10,8 +10,6 @@ PRIVATE_REPO="git@github.com-m3u-tv:compte-bidon/m3u-tv.git"
 PROJECT_DIR="$HOME/m3u-tv"
 
 SETUP_SERVICE="web_m3u_setup"
-SERVICE_NAME="m3u_tv"
-MEDIAFLOW_SERVICE_NAME="mediaflow_light"
 
 SSH_DIR="$HOME/.ssh"
 SSH_KEY="$SSH_DIR/m3u_tv_deploy_key"
@@ -307,11 +305,3 @@ sleep 1
 
 kill "$JOURNAL_PID" 2>/dev/null || true
 wait "$JOURNAL_PID" 2>/dev/null || true
-
-# ============================================================
-# 12. Start the components for the initial install
-# ============================================================
-
-echo "▶️ Starting services..."
-sudo systemctl start "$MEDIAFLOW_SERVICE_NAME"
-sudo systemctl start "$SERVICE_NAME"
