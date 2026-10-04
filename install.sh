@@ -9,6 +9,8 @@ set -e
 PRIVATE_REPO="git@github.com-m3u-tv:compte-bidon/m3u-tv.git"
 PROJECT_DIR="$HOME/m3u-tv"
 
+SETUP_SERVICE="web_m3u_setup"
+
 SSH_DIR="$HOME/.ssh"
 SSH_KEY="$SSH_DIR/m3u_tv_deploy_key"
 SSH_CONFIG="$SSH_DIR/m3u_tv_config"
@@ -251,13 +253,53 @@ git -C "$PROJECT_DIR" config \
 
 echo "✅ Repository SSH authentication configured"
 
+# ============================================================
+# 10. Create bootup setup service
+# ============================================================
+
+SETUP_FILE="/etc/systemd/system/${SETUP_SERVICE}.service"
+
+echo "⚙️ Creating setup service..."
+
+sudo tee "$SETUP_FILE" > /dev/null <<EOF
+[Unit]
+Description=M3U playlist web server setup (runs on every boot)
+After=network.target
+
+[Service]
+Type=oneshot
+User=$(whoami)
+ExecStart=/bin/bash -c "git -C $PROJECT_DIR pull && bash $PROJECT_DIR/install.sh"
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl enable "$SETUP_SERVICE"
+echo "✅ Setup service enabled"
+
 
 # ============================================================
-# 10. Run private installer
+# 11. Start the bootup setup service
 # ============================================================
 
 echo ""
-echo "🚀 Running private installer..."
+echo "🚀 Starting the setup service..."
 echo ""
 
-exec bash "$PROJECT_DIR/install.sh"
+sudo journalctl --rotate 2>/dev/null || true
+
+sudo systemctl start "$SETUP_SERVICE" &
+START_PID=$!
+
+sudo journalctl -fu "$SETUP_SERVICE" &
+JOURNAL_PID=$!
+
+wait "$START_PID"
+SERVICE_EXIT_CODE=$?
+
+kill "$JOURNAL_PID" 2>/dev/null || true
+wait "$JOURNAL_PID" 2>/dev/null || true
