@@ -145,17 +145,7 @@ Logs (history):    `sudo journalctl -u web_m3u_setup`
 
 Disable autostart: `sudo systemctl disable web_m3u_setup`
 
-## 2.2 Web server environment setup script
-
-Status:            `sudo systemctl status m3u_tv_env_setup`
-
-Logs (live):       `sudo journalctl -u m3u_tv_env_setup -f`
-
-Logs (history):    `sudo journalctl -u m3u_tv_env_setup`
-
-Disable autostart: `sudo systemctl disable m3u_tv_env_setup`
-
-## 2.3 Web server
+## 2.2 Web server
 
 Start service:     `sudo systemctl start m3u_tv`
 
@@ -171,18 +161,18 @@ Logs (history):    `sudo journalctl -u m3u_tv`
 
 Disable autostart: `sudo systemctl disable m3u_tv`
 
-## 2.4 MediaFlow Proxy
+## 2.3 MediaFlow Proxy Light
 
-Start service:     `sudo systemctl start mediaflow`
+Start service:     `sudo systemctl start mediaflow_light`
 
-Stop service:      `sudo systemctl stop mediaflow`
+Stop service:      `sudo systemctl stop mediaflow_light`
 
-Restart service:   `sudo systemctl restart mediaflow`
+Restart service:   `sudo systemctl restart mediaflow_light`
 
-Status:            `sudo systemctl status mediaflow`
+Status:            `sudo systemctl status mediaflow_light`
 
-Logs (live):       `sudo journalctl -u mediaflow -f`
+Logs (live):       `sudo journalctl -u mediaflow_light -f`
 
-Logs (history):    `sudo journalctl -u mediaflow`
+Logs (history):    `sudo journalctl -u mediaflow_light`
 
-Disable autostart: `sudo systemctl disable mediaflow`
+Disable autostart: `sudo systemctl disable mediaflow_light`
